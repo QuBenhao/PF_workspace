@@ -1,0 +1,7 @@
+The course ID is: "P102",1, The location is: "12.10.02", The staff ID is: "e54321", "Lecture",1,9.00,10.30
+
+Student ID: "s1", Student name: "Zhang Zhihui"
+Enroll in: P102, Type: Lecture, Day: Monday, Start Time: 9:0, End Time: 10:30
+
+Student ID: "s3773865", Student name: "Qu Benhao"
+Enroll in: P102, Type: Lecture, Day: Monday, Start Time: 9:0, End Time: 10:30

@@ -1,17 +1,34 @@
 package invoker;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class Application {
-	
+public class Application{
+
 	Scanner input = new Scanner(System.in);
 	
-	HashMap<String, Course> courses;
-	HashMap<String, Venue> venues;
-	HashMap<String, Staff> staffs;
-	ArrayList<Lesson> lessons;
+	// In order to save file name uniquely, using current time
+	LocalDate currentdate = LocalDate.now();
+	LocalTime currenttime = LocalTime.now();
+	File operation = new File(currentdate.format(DateTimeFormatter.BASIC_ISO_DATE)+"_"+currenttime.getHour()+currenttime.getMinute()+".txt");
 	
+	private HashMap<String, Course> courses;
+	private HashMap<String, Venue> venues;
+	private HashMap<String, Staff> staffs;
+	private ArrayList<Lesson> lessons;
+	private ArrayList<Student> students;
+		
 	// Constructor
 	public Application()
 	{
@@ -19,39 +36,51 @@ public class Application {
 		this.venues = new HashMap<String,Venue>();
 		this.staffs = new HashMap<String,Staff>();
 		this.lessons = new ArrayList<Lesson>();
+		this.students = new ArrayList<Student>();
 	}
 	
-	public void start()
-	{
-		new Testcase(courses,venues,staffs);
-    	this.showmenu();
-		this.control();	
-		input.close();
+	public void start(String user) throws Exception
+	{		
+		// read Default_data
+	    File file = new File("Default_data.txt");
+		new Testcase(file,courses,venues,staffs,lessons,students);
+		
+		// The other way to input data
+		@SuppressWarnings("unused")
+		String[] data = {"students.dat","lessons.dat","venues.dat","staffs.dat","courses.dat"};	
+//		this.readAllObject(data);
+		
+		// Admin
+		if(user.compareToIgnoreCase("admin") == 0 || user.compareToIgnoreCase("A") == 0)
+		{
+	    	Menu.mainmenu();
+			this.control();	
+		}
+		// Student
+		else if(user.compareToIgnoreCase("student")==0 || user.compareToIgnoreCase("S")==0)
+		{
+			file = new File("LessonForStudent.txt");
+			new Testcase(file,courses,venues,staffs,lessons,students);
+			StudentApp studentuse = new StudentApp(courses,venues,staffs,lessons,students);
+			studentuse.enroll();
+		}
+		else
+		{
+			System.out.println("The user does not exist");
+		}
+		
+		// Save all the information
+		this.saveAll();
+		
+		// The other way to save information
+//		this.saveAllObject(data);
 	}
 	
-	public void showmenu()
-	{
-		System.out.println("**************** Welcome to the Timetabling and Enrolment System ****************");
-		System.out.println("1: To do actions related to courses");
-		System.out.println("2: To do actions related to venues");
-		System.out.println("3: To do actions related to staffs");
-		System.out.println("4: To add lecture or tutorial");
-		System.out.println("5: To print timetable");
-//		System.out.println("6: ");
-//		System.out.println("7: To enroll student in course offering");
-//		System.out.println("8: To register student in tutorial");
-//		System.out.println("9: To show menu again");
-//		System.out.println("0 or letters: To exit");
-		System.out.println("*********************************************************************************");
-	}
-	
-	public void control()
+	//  Main menu
+	private void control() throws Exception
 	{
 		int choice = 0;
-		int coursechoice = 0;
-		int venuechoice = 0;
-		int staffchoice = 0;
-		String lessonchoice = null;
+		// Timetable class objects
 		ArrayList<Timetable> timetables = new ArrayList<Timetable>();
 		
 	    do
@@ -64,564 +93,246 @@ public class Application {
 			switch(choice)
 			{
 				case 1: 
-					System.out.println("Enter 1: To add course");
-					System.out.println("Enter 2: To add course Offering");
-					System.out.println("Enter 3: To find course information");
-					System.out.println("Enter 4: To list all the course");
-					System.out.println("Enter 5: To remove a course");
-					System.out.println("Enter 6: To find course offering information");
-					coursechoice = input.nextInt();
-					this.course(coursechoice);
+					// Course menu
+					CourseApp courseuse = new CourseApp(courses,lessons);
+					courseuse.control();
 					break;
 				case 2:
-					System.out.println("Enter 1: To add venue");
-					System.out.println("Enter 2: To find venue information");
-					System.out.println("Enter 3: To list all the venue");
-					System.out.println("Enter 4: To add lesson to the venue");
-					System.out.println("Enter 5: To list all the lessons of a venue");
-					venuechoice = input.nextInt();
-					this.venue(venuechoice);
+					// Venue menu
+					VenueApp venueuse = new VenueApp(courses,venues,lessons);
+					venueuse.control();
 					break;
 				case 3:
-					System.out.println("Enter 1: To add staff");
-					System.out.println("Enter 2: To find staff information");
-					System.out.println("Enter 3: To list all the staff");
-					System.out.println("Enter 4: To assign lesson to the staff");
-					System.out.println("Enter 5: To list all the lessons of a staff");
-					staffchoice = input.nextInt();
-					this.staff(staffchoice);
+					// Staff menu
+					StaffApp staffuse = new StaffApp(courses,staffs,lessons);
+					staffuse.control();
 					break;
 				case 4:
-					System.out.print("To add Lecture(L) or Tutorial(T)? Or enter List All to list all lessons Or enter the course ID to find a certain lesson:");
-					input.useDelimiter("\n");
-					lessonchoice = input.next();
-					if(lessonchoice.compareToIgnoreCase("List All")==0)
-						this.listAllLessons();
-					else if(courses.containsKey(lessonchoice))
-					{
-						int day;
-						double start;
-						System.out.print("Enter the day for the lesson:");
-						day = input.nextInt();
-						System.out.print("Enter the start time for the lesson:");
-						start = input.nextDouble();
-						this.getLesson(lessonchoice,day,start);		
-					}
-					else
-						this.lesson(lessonchoice);
+					// Lesson menu
+					LessonApp lessonuse = new LessonApp(courses,venues,staffs,lessons);
+					lessonuse.control();
 					break;
 				case 5:
+					// Print lesson timetable
 					Timetable t = new Timetable(lessons);
-					System.out.print("Print timetable based on course, staff or venue?");
+					System.out.print("Print timetable based on course, staff, venue or student?");
 					input.useDelimiter("\n");
-					String type0 = input.next();
-					System.out.print("Enter the course ID or Staff number or venue location:");
+					String type = input.next();
+					System.out.print("Enter the course ID or Staff number or venue location or student ID:");
 					input.useDelimiter("\n");
 					String ID = input.next();
-					// check if it exists here!
-					t.print(type0,ID);
-					timetables.add(t);
+					if(check(type,ID,courses,venues,staffs))
+					{
+						t.print(type,ID);
+						t.savePic(type,ID);
+						timetables.add(t);
+					}
+					else if(type.compareToIgnoreCase("student")==0)
+					{
+						Student student = null;
+						int index;
+						for(index=0;index<students.size();index++)
+						{
+							student = students.get(index);
+							if(student.getID().compareTo(ID)==0)
+								break;
+						}
+						if(index!=students.size() && students.size()!=0)
+						{
+							Timetable ts;
+							if(student!=null)
+							{
+								ts = new Timetable(student.getLessons());
+								ts.print(type, ID);
+								ts.savePic(type, ID);
+								timetables.add(ts);
+							}
+						}
+					}
+					break;
+				case 6:
+					// Retrieve data from the file
+					System.out.print("Enter the filename:");
+					input.useDelimiter("\n");
+					String filename = input.next();
+					File file = new File(filename);
+					if(file.exists())
+					{
+						if(file.canRead())
+							new Testcase(file,courses,venues,staffs,lessons,students);
+						System.out.println("Input succeed");
+					}
+					else
+						System.out.println("No such a file");
+					break;
+				case 7:
+					// Enroll student
+					StudentApp studentuse = new StudentApp(courses,venues,staffs,lessons,students);
+					studentuse.enroll();
+					break;
+				case 8:
+					for(Student s:students)
+					{
+						System.out.println(s.toString());
+					}
+					break;
+				case 9:
+					Menu.mainmenu();
 					break;
 				default:
 					for(int index=0;index<timetables.size();index++)
 						timetables.get(index).close();
-					System.out.println("Exiting the program");
 					choice = 0;
-
 			}
+			if(choice!=0)
+				System.out.println("Back to the main menu");
 		}while(choice!=0);
+		System.out.println("Exiting the program");
 	}
 	
-	public void course(int n)
+	
+	// Check exist or not
+	protected boolean check(String type,String ID, HashMap<String, Course> courses, HashMap<String, Venue> venues, HashMap<String, Staff> staffs) throws PreExistException
 	{
-		String courseID = null;
-		switch(n)
+		PreExistException ex;
+		if(type.compareToIgnoreCase("Course")==0)
 		{
-			case 1:
-				this.addCourse();
-				break;
-			case 2:
-				int max;
-				System.out.println("Enter the course ID that want to create offering:");
-				input.useDelimiter("\n");
-				courseID = input.next();
-				System.out.println("Enter the course offering max number:");
-				max = input.nextInt();
-				this.createCourseOffering(courseID, max);
-				break;
-			case 3:
-				System.out.println("Enter the course ID that want to find information about:");
-				input.useDelimiter("\n");
-				courseID = input.next();
-				this.getCourse(courseID);
-				break;
-			case 4:
-				this.listAllCourse();
-				break;
-			case 5:
-				System.out.println("Enter the course ID that want to remove:");
-				input.useDelimiter("\n");
-				courseID = input.next();
-				this.removeCourse(courseID);
-				break;
-			case 6:
-				System.out.println("Enter the course ID that want to get course offering:");
-				input.useDelimiter("\n");
-				courseID = input.next();
-				Course value = courses.get(courseID);
-				if(courses.containsKey(courseID))
-				{
-					if(value.getOffering()!=null)
-						System.out.println("The course offering max number is: " + value.getOffering().getMaxnum());
-					else
-						System.out.println("The course does not have course offering yet.");
-				}
-				break;
+			ex = new PreExistException(0,ID,courses);
+			try 
+			{
+				// if the course does not exist, throw Exception
+				if(!ex.checkCourse())
+					throw ex;
+				return true;
+			}
+			catch(PreExistException ex0)
+			{
+				System.out.println("The course " + ID +" does not exist.");
+				return false;
+			}
 		}
+		else if(type.compareToIgnoreCase("Staff")==0)
+		{
+			ex = new PreExistException(ID,staffs,2);
+			try 
+			{
+				// if the staff does not exist
+				if(!ex.checkStaff())
+					throw ex;			
+				return true;					
+			}
+			catch(PreExistException ex0)
+			{
+				System.out.println("The staff " + ID + " does not exist.");
+				return false;
+			}	
+		}
+		else if(type.compareToIgnoreCase("Venue")==0)
+		{
+			ex = new PreExistException(ID,1,venues);
+			try 
+			{
+				// if the venue does not exist
+				if(!ex.checkVenue())
+					throw ex;
+				return true;
+			}
+			catch(PreExistException ex0)
+			{
+				System.out.println("The venue " + ID + " does not exist.");
+				return false;
+			}
+		}
+		return false;
 	}
 	
-
-	public boolean addCourse()
+	// Save data through PrintWriter
+ 	private void saveAll() throws FileNotFoundException
 	{
-		String courseID;
-		String coursename;
-		String coursepurpose;
-		System.out.println("Enter the course ID:");
-		input.useDelimiter("\n");
-		courseID = input.next();
-		if(courses.containsKey(courseID))
-		{
-			System.out.println("The course already exists, back to the last menu.");
-			return false;
-		}
-		else
-		{
-			System.out.println("Enter the course name:");
-			coursename = input.next();
-			System.out.println("Enter the course purpose:");
-			coursepurpose = input.next();
-			courses.put(courseID, new Course(courseID,coursename,coursepurpose));
-			return true;
-		}
+		PrintWriter output = new PrintWriter(operation);
 		
-	}
-	
-	public Course getCourse(String courseID)
-	{
-		Course value = courses.get(courseID);
-		if(courses.containsKey(courseID))
-			System.out.println(value.toString()+";");
-		else
-			System.out.println("The course does not exist!");
-		return value;
-	}
-	
-	public void listAllCourse() 
-	{
 		courses.forEach((k,v) ->
 		{
-			this.getCourse(k);
+			output.println("course: \""+v.getID()+"\", \""+v.getName()+"\", \""+v.getPurpose()+"\"");
 		});
-	}
-	
-	public void removeCourse(String courseID)
-	{
-		if(courses.containsKey(courseID))
-		{
-			int size = lessons.size();
-			for(int index=0;index<size;index++)
-			{
-				if(courseID.compareTo(lessons.get(index).getCourseOffering().getCourse().getID())==0)
-					lessons.remove(index);
-			}
-			courses.remove(courseID);
-		}
-		else
-			System.out.println("The course does not exist!");
-	}
-	
-	public void createCourseOffering(String courseID, int max)
-	{
-		Course value = courses.get(courseID);
-		if(value == null)
-			System.out.println("The course does not exist, create the course first.");
-		else
-			value.createOffering(max,value);
-	}
-	
-	public void venue(int n)
-	{
-		String location = null;
-		switch(n)
-		{
-			case 1:
-				this.addVenue();
-				break;
-			case 2:
-				System.out.println("Enter the venue location that want to find information about:");
-				input.useDelimiter("\n");
-				location = input.next();
-				this.getVenue(location);
-				break;
-			case 3:
-				this.listAllVenue();
-				break;
-			case 4:
-				System.out.println("Enter the venue location that want to add lesson:");
-				input.useDelimiter("\n");
-				location = input.next();
-				String courseID;
-				int day;
-				double start;
-				System.out.print("Enter the course ID of the lesson:");
-				input.useDelimiter("\n");
-				courseID = input.next();
-				if(courses.containsKey(courseID))
-				{
-					Course value = courses.get(courseID);
-					System.out.print("Enter the day of the lesson:");
-					day = input.nextInt();
-					System.out.print("Enter the start hour of the lesson:");
-					start = input.nextDouble();
-					CourseOffering co = value.getOffering();
-					if(co!=null)
-					{
-						int index;
-						for(index=0;index<lessons.size();index++)
-						{
-							Lesson l = lessons.get(index);
-							String type;
-							if(l.getCourseOffering().getCourse().getID()==co.getCourse().getID() && l.getDay()==day && l.getStart()==start && l.getVenue()==null)
-							{
-								type = l.printType();
-								double dur = l.getEnd()-start;
-								l.getCourseOffering().removeLecture();
-								lessons.remove(l);
-								this.addLesson(type, courseID, day, start, dur, venues.get(location));
-								System.out.println("!!!!!!!!!!!!!!!!");
-								break;
-							}
-						}
-						if(index==lessons.size())
-							System.out.println("Do not have such lesson or already have venue for the lesson");
-					}
-				}
-				else
-					System.out.println("The course does not exist.");
-				break;
-			case 5:
-				System.out.println("Enter the venue location that want to list all lessons:");
-				input.useDelimiter("\n");
-				location = input.next();
-				this.listAllLessons(venues.get(location));
-		}
-	}
-	
-	public boolean addVenue()
-	{
-		String location;
-	    int capacity;
-		String purpose;
-		System.out.print("Enter the location: ");
-		location = input.nextLine();
-		if(venues.containsKey(location))
-		{
-			System.out.println("The venue already exists, back to the last menu.");
-			return false;
-		}
-		else
-		{
-			System.out.print("Enter the capacity: ");
-			capacity = input.nextInt();
-			System.out.print("Enter the purpose: ");
-			purpose = input.nextLine();
-			venues.put(location, new Venue(location,capacity,purpose));
-			return true;
-		}
-	}
-	
-	public Venue getVenue(String location)
-	{
-		Venue value = venues.get(location);
-		//change here -> toString
-		if(venues.containsKey(location))
-			System.out.println(value.toString()+";");
-		else
-			System.out.println("The venue does not exist.");
-		return value;
-	}
-	
-	public void listAllVenue() 
-	{
+		output.println();
+		
 		venues.forEach((k,v) ->
 		{
-			this.getVenue(k);
+			output.println("venue: \""+v.getLocation()+"\","+v.getCapacity()+",\""+v.getPurpose()+"\"");
 		});
-	}
-	
-	public void staff(int n)
-	{
-		String staffID;
-		switch(n)
-		{
-			case 1:
-				this.addStaff();
-				break;
-			case 2:
-				System.out.print("Enter the staff number that want to find his or her information:");
-				input.useDelimiter("\n");
-				staffID = input.next();
-				this.getStaff(staffID);
-				break;
-			case 3:
-				this.listAllStaff();
-				break;
-			case 4:
-				System.out.print("Enter the staff number that want to set with a lesson :");
-				input.useDelimiter("\n");
-				staffID = input.next();
-				Staff s = staffs.get(staffID);
-				String courseID;
-				int day;
-				double start;
-				if(s!=null)
-				{
-					System.out.print("Enter the course ID of the lesson:");
-					input.useDelimiter("\n");
-					courseID = input.next();
-					if(courses.containsKey(courseID))
-					{
-						Course value = courses.get(courseID);
-						System.out.print("Enter the day of the lesson:");
-						day = input.nextInt();
-						System.out.print("Enter the start hour of the lesson:");
-						start = input.nextDouble();
-						CourseOffering co = value.getOffering();
-						if(co!=null)
-						{
-							int index;
-							for(index=0;index<lessons.size();index++)
-							{
-								Lesson l = lessons.get(index);
-								if(l.getCourseOffering().getCourse().getID()==co.getCourse().getID() && l.getDay()==day && l.getStart()==start && l.getStaff()==null)
-								{
-									l.setStaff(s);
-									break;
-								}
-							}
-							if(index==lessons.size())
-								System.out.println("Do not have such lesson or already have staff for the lesson");
-						}	
-					}
-				}
-				break;
-			case 5:
-				System.out.print("Enter the staff number that want to list all the lessons :");
-				input.useDelimiter("\n");
-				staffID = input.next();
-				Staff s1 = staffs.get(staffID);
-				this.listAllLessons(s1);
-				break;
-		}
-	}
-	
-	public boolean addStaff()
-	{
-		String eNo;
-		String name;
-		String position;
-		String office;
-		System.out.print("Enter the staff Number: ");
-		eNo = input.nextLine();
-		if(staffs.containsKey(eNo))
-		{
-			System.out.println("The staff already exists, back to the last menu.");
-			return false;
-		}
-		else
-		{
-			System.out.print("Enter the name: ");
-			name = input.nextLine();
-			System.out.print("Enter the position: ");
-			position = input.nextLine();
-			System.out.print("Enter the office: ");
-			office = input.nextLine();
-			staffs.put(eNo, new Staff(eNo,name,position,office));
-			return true;
-		}
-	}
-	
-	public Staff getStaff(String staffID)
-	{
-		Staff value = staffs.get(staffID);
-		if(staffs.containsKey(staffID))
-			System.out.println(value.toString()+";");
-		else
-			System.out.println("The staff does not exist.");
-		return value;
-	}
-	
-	public void listAllStaff() 
-	{
+		output.println();
+		
 		staffs.forEach((k,v) ->
 		{
-			this.getStaff(k);
+			output.println("staff: \""+v.geteNo()+"\",\""+v.getName()+"\",\""+v.getPosition()+"\",\""+v.getOffice()+"\"");
 		});
-	}
-	
-	
-	
-	public void lesson(String type)
-	{
-		String courseID;
-		int day = 0;
-		double start = 0.0;
-		double dur = 0.0;
-		System.out.print("Enter the course ID to add lesson:");
-		input.useDelimiter("\n");
-		courseID = input.next();
-		if(courses.containsKey(courseID))
+		output.println();
+		
+		for(Lesson n:lessons)
 		{
-			if(courses.get(courseID).getOffering()!=null && (type.compareToIgnoreCase("L")==0 || type.compareToIgnoreCase("LECTURE")==0 ) && courses.get(courseID).getOffering().a !=null)
-					System.out.println("The lecture for this course already exist!");
-			else
-			{
-				System.out.print("Enter the day for the lesson:");
-				day = input.nextInt();
-				System.out.print("Enter the start time for the lesson:");
-				start = input.nextDouble();
-				System.out.print("Enter the durition of the lesson:");
-				dur = input.nextDouble();
-				System.out.print("Enter the location of the lesson, if do not have idea, enter N:");
-				input.useDelimiter("\n");
-				String location = input.next();
-				if(location.compareToIgnoreCase("n")!=0)
-				{
-					Venue ven = venues.get(location);
-					this.addLesson(type, courseID, day, start, dur,ven);
-				}
-				else
-					this.addLesson(type, courseID, day, start, dur,null);
-			}
-		}
-		else
-			System.out.println("The course does not exist.");
-	}
-	
-	
-	
-	public void addLesson(String type,String courseID,int day,double start,double dur,Venue ven)
-	{
-		Course value = courses.get(courseID);
-
-		CourseOffering cusoff = value.getOffering();
-		if(cusoff == null)
-		{
-			System.out.println("Please enter the max number of students for the course:");
-			int max = input.nextInt();
-			value.createOffering(max,value);
-			cusoff = value.getOffering();
-		}
-		if(type.compareToIgnoreCase("L")==0 || type.compareToIgnoreCase("LECTURE")==0)
-		{
-			lessons.add(cusoff.addLecture(day,start,start+dur,ven));
-			if(ven!=null)
-				ven.addLesson(lessons.get(lessons.size()-1));
-		}
-		if(type.compareToIgnoreCase("T")==0 || type.compareToIgnoreCase("TUTORIAL")==0)
-		{
-			lessons.add(cusoff.addTutorial(day,start,start+dur,ven));	
-			if(ven!=null)
-				ven.addLesson(lessons.get(lessons.size()-1));
-		}
-	}
-	
-	public void getLesson(String courseID,int day, double start)
-	{
-		Lesson l = null;
-		Course value = courses.get(courseID);
-		CourseOffering cusoff = null;
-		if(value!=null)
-		{
-			cusoff = value.getOffering();
-			if(cusoff != null)
-			{
-				l = cusoff.getLesson(day, start);
-				System.out.println(l.toString());	
-			}
-		}
-	}
-	
-	public void listAllLessons()
-	{
-		int index;
-		Lesson n;
-		for(index=0;index<lessons.size();index++)
-		{
-			n = lessons.get(index);
-			System.out.print("The course ID is: " + n.getCourseOffering().getCourse().getID()+"; ");
+			output.print("The course ID is: \"" + n.getCourseOffering().getCourse().getID()+"\","+ n.getCourseOffering().getMaxnum()+", ");
 			if(n.getVenue()!=null)
-				System.out.print("The location is: " + n.getVenue().getLocation() +"; ");
+				output.print("The location is: \"" + n.getVenue().getLocation() +"\", ");
 			else
-				System.out.print("Location: To Be Determined; ");
+				output.print("Location: To Be Determined; ");
 			if(n.getStaff()!=null)
-				System.out.print("The staff ID is: " + n.getStaff().geteNo() +"; ");
+				output.print("The staff ID is: \"" + n.getStaff().geteNo() +"\", ");
 			else
-				System.out.print("Staff: To Be Determined; ");
-			System.out.println(n.toString());
-			
+				output.print("Staff: To Be Determined; ");
+			output.printf("\""+n.printType()+"\","+n.getDay()+","+"%.2f"+","+"%.2f",n.getStart(),n.getEnd());
+			output.println();
 		}
-	}
-	
-	public void listAllLessons(Venue v)
-	{
-		ArrayList<Lesson> lessonsv = new ArrayList<Lesson>();
-		lessonsv = v.getLessons();
-		Lesson n;
-		for(int index=0;index<lessonsv.size();index++)
+		output.println();
+		
+		for(Student student:students)
 		{
-			n = lessonsv.get(index);
-			if(n.getVenue()!=null)			
-				if(v.getLocation().compareTo(n.getVenue().getLocation())==0)
-				{
-					System.out.print(n.getCourseOffering().getCourse().toString()+ "; ");
-					if(n.getStaff()!=null)
-						System.out.print(n.getStaff().toString() + "; ");
-					else
-						System.out.print("Staff: To Be Determined; ");
-					System.out.println(n.toString());
-				}
+			output.print(student.toString());
+			output.println();
 		}
 		
+		output.close();
 	}
-	
-	public void listAllLessons(Staff s)
-	{
-		int index;
-		Lesson n;
-		for(index=0;index<lessons.size();index++)
+
+	@SuppressWarnings({ "unchecked", "unused" })
+	private void readAllObject(String input[]) throws FileNotFoundException, IOException, ClassNotFoundException
+ 	{
+		ObjectInputStream[] in = new ObjectInputStream[5];
+		for(int i=0;i<5;i++)
 		{
-			n = lessons.get(index);
-			if(n.getStaff()!=null)			
-				if(s.geteNo().compareTo(n.getStaff().geteNo())==0)
-				{
-					System.out.print(n.getCourseOffering().getCourse().toString()+ "; ");
-					if(n.getVenue()!=null)
-						System.out.print(n.getVenue().toString() + "; ");
-					else
-						System.out.print("Location: To Be Determined; ");
-					System.out.println(n.toString());
-				}
+			in[i] = new ObjectInputStream(new FileInputStream(input[i]));
+			if(input[i].contains("students"))
+				students = (ArrayList<Student>)in[i].readObject();
+			else if(input[i].contains("lessons"))
+				lessons = (ArrayList<Lesson>) in[i].readObject();
+			else if(input[i].contains("venues"))
+				venues = (HashMap<String, Venue>) in[i].readObject();
+			else if(input[i].contains("staffs"))
+				staffs = (HashMap<String, Staff>) in[i].readObject();
+			else if(input[i].contains("courses"))
+				courses = (HashMap<String, Course>) in[i].readObject();
+			in[i].close();
+		}
+ 	}
+ 	
+	@SuppressWarnings("unused")
+	private void saveAllObject(String output[]) throws FileNotFoundException, IOException 
+	{
+		ObjectOutputStream[] out = new ObjectOutputStream[5];
+		for(int i=0;i<5;i++)
+		{
+			out[i] = new ObjectOutputStream(new FileOutputStream(output[i]));
+			if(output[i].contains("students"))
+				out[i].writeObject(students);
+			else if(output[i].contains("lessons"))
+				out[i].writeObject(lessons);
+			else if(output[i].contains("venues"))
+			    out[i].writeObject(venues);
+			else if(output[i].contains("staffs"))
+			    out[i].writeObject(staffs);
+			else if(output[i].contains("courses"))
+				out[i].writeObject(courses);
+			out[i].close();
 		}
 	}
-	
-	public void assignStaff(String staffID, Lesson l)
-	{
-		l.setStaff(staffs.get(staffID));
-	}	
-	
-	
 }
-
-
-

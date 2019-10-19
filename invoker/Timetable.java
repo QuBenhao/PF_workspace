@@ -1,13 +1,17 @@
 package invoker;
 
-// from https://github.com/davejm/SwingCalendar
+// package from https://github.com/davejm/SwingCalendar
 import com.davidmoodie.SwingCalendar.Calendar;
 import com.davidmoodie.SwingCalendar.CalendarEvent;
 import com.davidmoodie.SwingCalendar.WeekCalendar;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -37,6 +41,7 @@ public class Timetable {
         // to transform double start to int hour and int minute
         double temp;
         ArrayList<CalendarEvent> events = new ArrayList<>();
+        
         for(int index=0;index<lessons.size();index++)
         {
         	Lesson n = lessons.get(index);
@@ -52,7 +57,7 @@ public class Timetable {
         	else
         		color = Color.YELLOW;
         	
-        	if((type.compareToIgnoreCase("Course")==0 && ID.compareTo(c.getID())==0 ) || (type.compareToIgnoreCase("Staff")==0 && ID.compareTo(n.getStaff().geteNo())==0) ||(type.compareToIgnoreCase("Venue")==0 && ID.compareTo(n.getVenue().getLocation())==0))        		
+        	if((type.compareToIgnoreCase("Course")==0 && ID.compareTo(c.getID())==0 ) || (type.compareToIgnoreCase("Staff")==0 && n.getStaff()!=null && ID.compareTo(n.getStaff().geteNo())==0) ||(type.compareToIgnoreCase("Venue")==0 && n.getVenue()!=null && ID.compareTo(n.getVenue().getLocation())==0) ||type.compareToIgnoreCase("Student")==0)        		
         	{
         		// a = Monday
         		d = a.plusDays(n.getDay()-1);
@@ -89,5 +94,39 @@ public class Timetable {
     public void close()
     {
     	frm.dispatchEvent(new WindowEvent(frm, WindowEvent.WINDOW_CLOSING));
+    }
+    
+    
+    // Code from https://blog.csdn.net/A694543965/article/details/73332934
+    public void savePic(String type,String filename){
+		
+		System.out.println("Processing - Saving "+type+" timetable to PNG file...");
+		
+		Container content=frm.getContentPane();
+		
+		BufferedImage img=new BufferedImage(
+				frm.getWidth(),frm.getHeight(),BufferedImage.TYPE_INT_RGB);
+		
+		Graphics2D g2d = img.createGraphics();
+		
+		content.printAll(g2d);
+		
+		type = type.toLowerCase();
+		// mkdir()
+		File dir = new File(type);
+		if(!dir.exists())
+			dir.mkdir();
+		File f = new File(dir.getAbsolutePath()+"/"+type+"_"+filename+".png");
+		System.out.println("Saved in: "+dir.getAbsolutePath());
+		try {
+			ImageIO.write(img, "png", f);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		g2d.dispose();
+
+		// print the date or not
+		System.out.println("Succeed!"/*+current*/);
     }
 }

@@ -1,0 +1,4 @@
+The course ID is: "P101",100, The location is: "10.10.23", The staff ID is: "e54321", "Tutorial",1,8.30,10.30
+The course ID is: "P101",100, The location is: "12.10.03", The staff ID is: "e44321", "Tutorial",1,9.30,11.30
+The course ID is: "P102",100, The location is: "10.10.23", The staff ID is: "e44556", "Tutorial",1,8.30,10.30
+The course ID is: "S101",100, The location is: "10.10.22", The staff ID is: "e44556", "Tutorial",1,8.30,10.30

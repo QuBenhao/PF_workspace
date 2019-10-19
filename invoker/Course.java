@@ -1,7 +1,14 @@
-package invoker; 
+package invoker;
 
-public class Course {
+import java.io.Serializable;
 
+public class Course implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	// Instance variables
 	private String ID;
 	private String name;
@@ -45,12 +52,11 @@ public class Course {
 		}
 		else
 		{
-			System.out.print("The course offering already exists!");
+			System.out.println("The course offering already exists!");
 			return false;
 		}
 	}
-	
-	//
+
 	public CourseOffering getOffering()
 	{
 		return co;

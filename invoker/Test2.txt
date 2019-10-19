@@ -1,0 +1,14 @@
+venue: "10.10.24",1,"Test"
+
+The course ID is: "P101",2, The location is: "12.10.03", The staff ID is: "e44556", "Lecture",1,8.00,11.00
+The course ID is: "P102",1, The location is: "12.10.02", The staff ID is: "e54321", "Lecture",1,9.00,10.30
+The course ID is: "P101",2, The location is: "10.10.24", The staff ID is: "e44321", "Tutorial",4,8.00,10.00
+
+Student ID: "s1", Student name: "Zhang Zhihui"
+Enroll in: P101, Type: Lecture, Day: Monday, Start Time: 8:0, End Time: 11:0
+Enroll in: P102, Type: Lecture, Day: Monday, Start Time: 9:0, End Time: 10:30
+Enroll in: P101, Type: Tutorial, Day: Thursday, Start Time: 8:0, End Time: 10:0
+
+Student ID: "s3773865", Student name: "Qu Benhao"
+Enroll in: P101, Type: Lecture, Day: Monday, Start Time: 8:0, End Time: 11:0
+Enroll in: P101, Type: Tutorial, Day: Thursday, Start Time: 8:0, End Time: 10:0

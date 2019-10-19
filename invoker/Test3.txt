@@ -1,0 +1,42 @@
+course: "Net1", "Networking", "Teach networking principles"
+course: "P102", "Programming 2", "Teach Intermediate Programming"
+course: "P101", "Programming 1", "Teach Basic Programming"
+course: "S101", "Software Engineering", "Teach UML and Modelling"
+course: "WP1", "Web Programming", "Teach Web Technologies"
+course: "UI1", "User Interface", "Teach UI Principles"
+course: "Math", "Discret Maths", "Teach Maths needed for CS"
+
+venue: "12.10.03",200,"Interactive"
+venue: "10.10.22",36,"Traditional"
+venue: "12.10.02",100,"Interactive"
+venue: "10.10.23",36,"Traditional"
+
+staff: "e54321","Jane Smith","Lecturer","14.13.13"
+staff: "e44321","Richard Cooper","Professor","14.13.12"
+staff: "e44556","Tim O'Connor","Lecturer","14.13.11"
+staff: "e53457","Isaac Newton","Associate Professor","14.13.14"
+
+The course ID is: "P101",200, The location is: "12.10.03", The staff ID is: "e54321", "Lecture",1,8.00,10.00
+The course ID is: "P102",200, The location is: "12.10.03", The staff ID is: "e44556", "Lecture",1,14.00,16.00
+The course ID is: "S101",100, The location is: "12.10.02", The staff ID is: "e53457", "Lecture",2,8.00,10.00
+The course ID is: "WP1",150, The location is: "12.10.03", The staff ID is: "e44321", "Lecture",5,8.00,11.00
+The course ID is: "P101",200, The location is: "10.10.23", The staff ID is: "e44556", "Tutorial",2,14.00,16.00
+The course ID is: "P102",200, The location is: "10.10.23", The staff ID is: "e54321", "Tutorial",3,8.00,10.00
+The course ID is: "S101",100, The location is: "10.10.23", The staff ID is: "e44321", "Tutorial",3,14.00,16.00
+The course ID is: "WP1",150, The location is: "10.10.22", The staff ID is: "e44556", "Tutorial",4,8.00,10.00
+The course ID is: "UI1",100, The location is: "12.10.02", The staff ID is: "e54321", "Lecture",4,14.00,16.00
+The course ID is: "UI1",100, The location is: "10.10.23", The staff ID is: "e53457", "Tutorial",5,14.00,16.00
+
+Student ID: "s1", Student name: "Zhang Zhihui"
+Enroll in: P101, Type: Lecture, Day: Monday, Start Time: 8:0, End Time: 10:0
+Enroll in: P102, Type: Lecture, Day: Monday, Start Time: 14:0, End Time: 16:0
+Enroll in: S101, Type: Lecture, Day: Tuesday, Start Time: 8:0, End Time: 10:0
+Enroll in: WP1, Type: Lecture, Day: Friday, Start Time: 8:0, End Time: 11:0
+Enroll in: P101, Type: Tutorial, Day: Tuesday, Start Time: 14:0, End Time: 16:0
+Enroll in: P102, Type: Tutorial, Day: Wednesday, Start Time: 8:0, End Time: 10:0
+Enroll in: S101, Type: Tutorial, Day: Wednesday, Start Time: 14:0, End Time: 16:0
+Enroll in: WP1, Type: Tutorial, Day: Thursday, Start Time: 8:0, End Time: 10:0
+Enroll in: UI1, Type: Lecture, Day: Thursday, Start Time: 14:0, End Time: 16:0
+Enroll in: UI1, Type: Tutorial, Day: Friday, Start Time: 14:0, End Time: 16:0
+
+

@@ -1,8 +1,14 @@
 package invoker;
 
-public class Staff {
+import java.io.Serializable;
+import java.util.ArrayList;
 
-	// Instance variables
+public class Staff implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3L;
 	private String eNo;
 	private String name;
 	private String position;
@@ -36,12 +42,11 @@ public class Staff {
 		return office;
 	}
 	
-	public void assign(Lesson a, Lesson b)
+	// assign staff, throws staff clash exception
+	public void assign(Lesson a, ArrayList<Lesson> lessons) throws ClashException
 	{
-		a.setStaff(this);
-		b.setStaff(this);
-	}
-	
+		a.setStaff(this,lessons);
+	}	
 	
 	@Override
 	public String toString()

@@ -1,9 +1,15 @@
 package invoker;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Venue {
+public class Venue implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2L;
+	
 	// Instance variables
 	private String location;
 	private int capacity;
